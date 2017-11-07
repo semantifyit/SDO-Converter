@@ -1,0 +1,23 @@
+{
+  "name": "schema_org_jsonld_transformator",
+  "version": "1.0.0",
+  "description": "Takes the schema.jsonld file from schema.org and transforms the data into several json files containing scructured representations about the schema, its classes and properties.",
+  "main": "transform.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jsonld",
+    "json",
+    "schema",
+    "org",
+    "transformator"
+  ],
+  "author": "Omar J. Aviles Holzknecht",
+  "license": "MIT",
+  "dependencies": {
+    "del": "^2.2.2",
+    "fs": "0.0.1-security",
+    "require": "^2.4.20"
+  }
+}

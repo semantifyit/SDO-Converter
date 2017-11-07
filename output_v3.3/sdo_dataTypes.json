@@ -1,0 +1,76 @@
+{
+  "Time": {
+    "name": "Time",
+    "description": "A point in time recurring on multiple days in the form hh:mm:ss[Z|(+|-)hh:mm] (see <a href=\"http://www.w3.org/TR/xmlschema-2/#time\">XML schema for details</a>).",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": []
+  },
+  "Number": {
+    "name": "Number",
+    "description": "Data type: Number.",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": [
+      "Integer",
+      "Float"
+    ]
+  },
+  "Text": {
+    "name": "Text",
+    "description": "Data type: Text.",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": [
+      "URL"
+    ]
+  },
+  "Boolean": {
+    "name": "Boolean",
+    "description": "Boolean: True or False.",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": []
+  },
+  "DateTime": {
+    "name": "DateTime",
+    "description": "A combination of date and time of day in the form [-]CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] (see Chapter 5.4 of ISO 8601).",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": []
+  },
+  "Date": {
+    "name": "Date",
+    "description": "A date value in <a href=\"http://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 date format</a>.",
+    "type": "DataType",
+    "superClasses": [],
+    "subClasses": []
+  },
+  "Integer": {
+    "name": "Integer",
+    "description": "Data type: Integer.",
+    "type": "DataType",
+    "superClasses": [
+      "Number"
+    ],
+    "subClasses": []
+  },
+  "URL": {
+    "name": "URL",
+    "description": "Data type: URL.",
+    "type": "DataType",
+    "superClasses": [
+      "Text"
+    ],
+    "subClasses": []
+  },
+  "Float": {
+    "name": "Float",
+    "description": "Data type: Floating number.",
+    "type": "DataType",
+    "superClasses": [
+      "Number"
+    ],
+    "subClasses": []
+  }
+}
