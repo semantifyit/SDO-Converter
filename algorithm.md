@@ -134,15 +134,16 @@ Since the _@type_ of **BookFormatType** is **rdfs:Class** this data node is stor
 
 ###C.) Classification cleaning
 To have a correct classification for our data model it is needed to clean the data generated in the previous step. Inaccurate records include:
- * Enumerations which are handled as Classes.
- * DataTypes which are handled as Classes.
- * Meta classes like **Enumeration** or **DataType**.
+
+- Enumerations which are handled as Classes.
+- DataTypes which are handled as Classes.
+- Meta classes like **Enumeration** or **DataType**.
  
- ####C.1) Extract enumerations from classes memory 
+####C.1) Extract enumerations from classes memory 
  For each entry in the classes memory check if its _superClasses_ contain **Enumeration**. If this is the case, it is known that this class is an enumeration, so this data entry is transformed and moved to the enumerations memory.
  
  Example data entry in the enumerations memory:
- ```javascript
+```javascript
 {
   "name": "BookFormatType",
   "description": "The publication format of the book.",
@@ -153,7 +154,7 @@ To have a correct classification for our data model it is needed to clean the da
   "subClasses": [],
   "enumerationMembers": []
 }
- ```
+```
  
  Enumerations from the GoodRelations Vocabulary for E-Commerce are problematic, since they do not have the same structure as the other SDO enumerations. Usually enumerations from SDO do not have properties and do not have subclasses. And they have enumeration instances (enumerationMembers) baked in the SDO vocabulary. GoodRelations enumerations do not have instances, instead they provide example URIs for possible values in the description of the enumeration. eg.: http://schema.org/PaymentMethod 
  
@@ -163,7 +164,7 @@ To have a correct classification for our data model it is needed to clean the da
  For each entry in the classes memory it is checked if its _superClasses_ is included in the dataTypes memory. If this is the case, it is known that this class is a DataType, so this data entry is transformed and moved to the dataTypes memory.
   
  Example data entry in the dataTypes memory:
- ```javascript
+```javascript
 {
   "name": "URL",
   "description": "Data type: URL.",
@@ -173,7 +174,7 @@ To have a correct classification for our data model it is needed to clean the da
   ],
   "subClasses": []
 }
- ```
+```
  ####C.3) Delete blacklisted Entries (deactivated)
  Schema.org contains utility entries like the classes Intangible, Enumeration or DataType. While this entries serve to understand the relationship between "things" in the SDO Data model, one may argue that there are entries that won't be needed or do not make sense at all, eg. create an Annotation with the @type "DataType". In this step a function is provided which deletes blacklisted classes. This function can be easily extended to properties, enumerations, etc. However, this step is commented out, so that the user can decide if he wants to use the data in question or not.
  ###D.) Inheritance
@@ -183,7 +184,8 @@ To have a correct classification for our data model it is needed to clean the da
 For each entry in the classes memory and enumerations memory the _superClasses_ are checked (if they are in classes memory or enumeration memory) and those super classes add the actual entry in their _subClasses_. Enumerations typically do not have subClasses, but the enumeration design of the GoodRelations Vocabulary breaks this rule, read more in step C.1. 
 
  Example data entry in the classes memory:
- ```JSON
+ 
+```JSON
 {
   "name": "LodgingBusiness",
   "description": "A lodging business, such as a motel, hotel, or inn.",
@@ -200,7 +202,8 @@ For each entry in the classes memory and enumerations memory the _superClasses_ 
     "Campground"
   ]
 }
- ```
+```
+
 ####D.2) Add subClasses for DataTypes
 For each entry in the dataTypes memory the _superClasses_ are checked (if they are in dataTypes memory) and those super types add the actual entry in their _subClasses_.
 
