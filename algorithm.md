@@ -143,7 +143,7 @@ To have a correct classification for our data model it is needed to clean the da
  For each entry in the classes memory check if its _superClasses_ contain **Enumeration**. If this is the case, it is known that this class is an enumeration, so this data entry is transformed and moved to the enumerations memory.
  
  Example data entry in the enumerations memory:
-```javascript
+```JSON
 {
   "name": "BookFormatType",
   "description": "The publication format of the book.",
@@ -164,7 +164,7 @@ To have a correct classification for our data model it is needed to clean the da
  For each entry in the classes memory it is checked if its _superClasses_ is included in the dataTypes memory. If this is the case, it is known that this class is a DataType, so this data entry is transformed and moved to the dataTypes memory.
   
  Example data entry in the dataTypes memory:
-```javascript
+```JSON
 {
   "name": "URL",
   "description": "Data type: URL.",
@@ -183,7 +183,7 @@ To have a correct classification for our data model it is needed to clean the da
 ####D.1) Add subClasses for Classes and Enumerations
 For each entry in the classes memory and enumerations memory the _superClasses_ are checked (if they are in classes memory or enumeration memory) and those super classes add the actual entry in their _subClasses_. Enumerations typically do not have subClasses, but the enumeration design of the GoodRelations Vocabulary breaks this rule, read more in step C.1. 
 
- Example data entry in the classes memory:
+Example data entry in the classes memory:
  
 ```JSON
 {
@@ -207,8 +207,8 @@ For each entry in the classes memory and enumerations memory the _superClasses_ 
 ####D.2) Add subClasses for DataTypes
 For each entry in the dataTypes memory the _superClasses_ are checked (if they are in dataTypes memory) and those super types add the actual entry in their _subClasses_.
 
- Example data entry in the dataTypes memory:
- ```javascript
+Example data entry in the dataTypes memory:
+```JSON
 {
   "name": "Number",
   "description": "Data type: Number.",
@@ -223,8 +223,8 @@ For each entry in the dataTypes memory the _superClasses_ are checked (if they a
 ####D.3) Add subProperties for Properties
 For each entry in the properties memory the _superProperties_ are checked (if they are in properties memory) and those super properties add the actual entry in their _subProperties_.
 
- Example data entry in the properties memory:
- ```javascript
+Example data entry in the properties memory:
+```JSON
 {
   "name": "about",
   "description": "The subject matter of the content.",
@@ -242,17 +242,17 @@ For each entry in the properties memory the _superProperties_ are checked (if th
     "Thing"
   ]
 }
- ```
+```
  
- ###E.) Relationships
- In this step additional fields are added to certain data entries to add links to other data entries, which should make it easier to use the generated data set. 
+###E.) Relationships
+In this step additional fields are added to certain data entries to add links to other data entries, which should make it easier to use the generated data set. 
   
- ####E.1) Add properties to classes
- For each entry in the classes memory the _properties_ field is added. This data field holds all properties which belong to this class (class is domain for property). The data field is filled in step E.3.
+####E.1) Add properties to classes
+For each entry in the classes memory the _properties_ field is added. This data field holds all properties which belong to this class (class is domain for property). The data field is filled in step E.3.
  
- Example data entry in the classes memory:
-  ```javascript
- {
+Example data entry in the classes memory:
+```JSON
+{
    "name": "LodgingBusiness",
    "description": "A lodging business, such as a motel, hotel, or inn.",
    "type": "Class",
@@ -268,14 +268,14 @@ For each entry in the properties memory the _superProperties_ are checked (if th
      "Campground"
    ],
    "properties": []
- }
-  ```
+}
+```
   
- ####E.2) Add enumerationMembers and properties to enumerations
- For each entry in the enumerations memory the _enumerationMembers_ and the _properties_ field are added. This data field holds all enumerationMembers which belong to this enumeration (enumerationMember is instance of this enumeration). The enumerationMembers for classes which are not enumerations (eg. Organizations) are skipped.
+####E.2) Add enumerationMembers and properties to enumerations
+For each entry in the enumerations memory the _enumerationMembers_ and the _properties_ field are added. This data field holds all enumerationMembers which belong to this enumeration (enumerationMember is instance of this enumeration). The enumerationMembers for classes which are not enumerations (eg. Organizations) are skipped.
    
- Example data entry in the enumerations memory:
- ```json
+Example data entry in the enumerations memory:
+```JSON
 {
   "name": "PaymentStatusType",
   "description": "A specific payment status. For example, PaymentDue, PaymentComplete, etc.",
@@ -293,14 +293,14 @@ For each entry in the properties memory the _superProperties_ are checked (if th
     "PaymentDeclined"
   ]
 }
- ```
+```
  
 ####E.3) Fill property fields for classes and enumerations
 For each property check the domainClasses, hence the classes and enumerations where they are used. Add the property to the properties field of that class/enumeration.
  Only properties for this particular class/enumeration are added, not all the properties from its superClasses.
- Example data entry in the classes memory:
-   ```json
-  {
+Example data entry in the classes memory:
+```JSON
+{
     "name": "LodgingBusiness",
     "description": "A lodging business, such as a motel, hotel, or inn.",
     "type": "Class",
@@ -324,8 +324,8 @@ For each property check the domainClasses, hence the classes and enumerations wh
       "starRating",
       "checkoutTime"
     ]
-  }
-   ``` 
+}
+``` 
  
 ###F.) In-memory Output Data creation
 This process step includes the rearrangement and materialization of the data in memory to create the output data according to the wished output files. At this stage the created data should match the target data model.
