@@ -160,10 +160,10 @@ To have a correct classification for our data model it is needed to clean the da
  
  The standard SDO approach and the GoodRelation approach of modelling enumerations are very different and there are arguments to defend any of the two design decisions. However, the fact that both enumeration design models are part of the SDO Core makes it difficult to create tools/algorithms which are aware and specialized around SDO enumerations.
  
- ####C.2) Extract dataTypes from classes memory 
+####C.2) Extract dataTypes from classes memory 
  For each entry in the classes memory it is checked if its _superClasses_ is included in the dataTypes memory. If this is the case, it is known that this class is a DataType, so this data entry is transformed and moved to the dataTypes memory.
   
- Example data entry in the dataTypes memory:
+Example data entry in the dataTypes memory:
 ```JSON
 {
   "name": "URL",
@@ -175,9 +175,9 @@ To have a correct classification for our data model it is needed to clean the da
   "subClasses": []
 }
 ```
- ####C.3) Delete blacklisted Entries (deactivated)
+####C.3) Delete blacklisted Entries (deactivated)
  Schema.org contains utility entries like the classes Intangible, Enumeration or DataType. While this entries serve to understand the relationship between "things" in the SDO Data model, one may argue that there are entries that won't be needed or do not make sense at all, eg. create an Annotation with the @type "DataType". In this step a function is provided which deletes blacklisted classes. This function can be easily extended to properties, enumerations, etc. However, this step is commented out, so that the user can decide if he wants to use the data in question or not.
- ###D.) Inheritance
+###D.) Inheritance
  Schema.org's Inheritance design states if an entity is the superClass/superProperty of another entity. In our data model design we also hold the information if an entity is the subClass/subProperty of another entity. In this step this inheritance information is generated.
  
 ####D.1) Add subClasses for Classes and Enumerations
@@ -219,7 +219,8 @@ Example data entry in the dataTypes memory:
     "Float"
   ]
 }
- ```
+```
+
 ####D.3) Add subProperties for Properties
 For each entry in the properties memory the _superProperties_ are checked (if they are in properties memory) and those super properties add the actual entry in their _subProperties_.
 
