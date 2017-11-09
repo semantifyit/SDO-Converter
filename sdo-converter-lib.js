@@ -148,7 +148,7 @@ var sdoConverter = new function () {
         var classObj = this.memory_classes[className];
         //check if property exists
         if(classObj === undefined){
-            return "Error: There is no clas with name '"+className+"' in the memory.";
+            return "Error: There is no class with name '"+className+"' in the memory.";
         }
         return classObj;
     };

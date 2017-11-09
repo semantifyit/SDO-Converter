@@ -4,17 +4,15 @@
  ===============
  */
 //include other files
-require('./memory.js')();
-require('./helperFunctions.js')();
+let fs = require('fs');
+let del = require('del');
 
 //programming objects
+let PATH_INPUT_SCHEMA = "data_input/schema.jsonld";
+let PATH_OUTPUT_DIRECTORY = "data_output";
+
 let inputDataRows = {}; //input data as graph nodes (we call them data rows here)
 let errors = []; //error log
-
-let classesData = {};
-let propertiesData = {};
-let enumerationsData = {};
-let dataTypeData = {};
 
 let memory_classes = {};        //classes without enumerations, enumeration instances and dataTypes
 let memory_properties = {};     //properties
@@ -22,15 +20,12 @@ let memory_dataTypes = {};      //dataType classes
 let memory_enumerations = {};   //enumeration classes
 let memory_enumerationMembers = {}; //enumeration instances
 
-let propertiesByClassData = {};
-
 let COUNTER_DATAROW_CLASS_SUPERSEDED = 0; //amount of skipped class data rows because they got superseded
 let COUNTER_DATAROW_PROPERTY_SUPERSEDED = 0; //amount of skipped property data rows because they got superseded
 let COUNTER_DATAROW_DATATYPE_SUPERSEDED = 0; //amount of skipped dataType data rows because they got superseded
 let COUNTER_DATAROW_ENUMERATIONMEMBER_SUPERSEDED = 0; //amount of skipped enumeration data rows because they got superseded
 let COUNTER_DATAROW_ERROR = 0; //amount of skipped data rows which contained errors
 
-//OUTPUT DATA
 let outputData_classes = {};            //sdo_classes.jsonld
 let outputData_properties = {};         //sdo_properties.jsonld
 let outputData_enumerations = {};       //sdo_enumerations.jsonld
@@ -38,13 +33,11 @@ let outputData_enumerationMembers = {}; //sdo_enumerationMembers.jsonld
 let outputData_dataTypes = {};          //sdo_dataTypes.jsonld
 let outputData_classesMaterialized = {};//sdo_classesMaterialized.jsonld
 
-
-
 /*
  ===============
- Initial Tasks
+ Algorithm Start
  ===============
- */
+*/
 init();
 function init() {
     cleanOutputDirectory();
@@ -52,14 +45,12 @@ function init() {
     startProcessLoadSchemaJSONLD();
 }
 
-//Step 1
 //deletes all files in the output directory
 function cleanOutputDirectory(){
     del.sync([PATH_OUTPUT_DIRECTORY+"/**","!"+PATH_OUTPUT_DIRECTORY]);
     print("i","All files in output directory '"+PATH_OUTPUT_DIRECTORY+"' deleted.");
 }
 
-//Step 2
 //Load the Input JSONLD file
 function startProcessLoadSchemaJSONLD(){
     if(fs.existsSync(PATH_INPUT_SCHEMA)) {
@@ -73,14 +64,11 @@ function startProcessLoadSchemaJSONLD(){
     }
 }
 
-//Step 3
 //Starts the transformation and generation of data.
 function startProcessTransformJSONLD(){
 
     //Algorithm Step B
     classifyInput();
-    //printOccurrencesNumberOfPropertyOfArray(inputDataRows,"@type"); //debug print
-    //printArrayOccurrences(inputDataRows, "@type");  //debug print
 
     //Algorithm Step C.1
     extractEnumerationFromClasses();
@@ -113,19 +101,11 @@ function startProcessTransformJSONLD(){
     //Algorithm Step F.2
     outputCreate_classesMaterialized();
 
-
     //Algorithm Step G.
     exportOutputFiles();
+    exportMinifiedOutputFiles();
     exportErrorFiles();
     exportMetaFiles();
-
-    //outputMemory(); //debug print
-
-    // inferEnumerations();
-    // classifyPropertiesByClass();
-    // materializeClasses();
-    // outputMetaData();
-    // outputClasses();
 }
 
 /*
@@ -720,7 +700,6 @@ function outputCreate_classesMaterialized(){
             outputData_classesMaterialized[keyArray[i]].enumerationMembers = materializedEnumerationMembers;
         }
     }
-
 }
 
 //recursive function which retrieves the properties of all superClasses of a Class/DataType/Enumeration
@@ -761,6 +740,16 @@ function exportOutputFiles(){
     writeDataInLocalFile("sdo_classesMaterialized.json",stringifyJSON(outputData_classesMaterialized));
 }
 
+//export a minified version of the output data files
+function exportMinifiedOutputFiles() {
+    writeDataInLocalFile("sdo_classes.min.json",JSON.stringify(outputData_classes, null, 0));
+    writeDataInLocalFile("sdo_properties.min.json",JSON.stringify(outputData_properties, null, 0));
+    writeDataInLocalFile("sdo_dataTypes.min.json",JSON.stringify(outputData_dataTypes, null, 0));
+    writeDataInLocalFile("sdo_enumerations.min.json",JSON.stringify(outputData_enumerations, null, 0));
+    writeDataInLocalFile("sdo_enumerationMembers.min.json",JSON.stringify(outputData_enumerationMembers, null, 0));
+    writeDataInLocalFile("sdo_classesMaterialized.min.json",JSON.stringify(outputData_classesMaterialized, null, 0));
+}
+
 //export the error files
 function exportErrorFiles(){
     writeDataInLocalFile("ErrorLog.txt","Amount of Errors: "+errors.length+"\n\n"+stringifyJSON(errors));
@@ -789,15 +778,92 @@ function exportMetaFiles() {
 
 /*
  ===============
- output processes
+ Helper functions
  ===============
  */
 
-//debug function
+function uniquifyArray(array) {
+    let seen = {};
+    let result = [];
+    for(let i = 0; i < array.length; i++) {
+        let item = array[i];
+        if(seen[item] !== 1) {
+            seen[item] = 1;
+            result.push(item);
+        }
+    }
+    return result;
+}
+function print(msgType,msg){
+    switch (msgType){
+        case "i":  console.log("Info: "+msg);break;
+        case "w":  console.log("Warning: "+msg);break;
+        case "e":  console.log("Error: "+msg);break;
+        case "d":  console.log("Debug: "+msg);break;
+    }
+}
+function stringifyJSON(data) {
+    return JSON.stringify(data, null, 2);
+}
+let contextURI = "http://schema.org/";
+function clipURIString(str) {
+    return str.substr(contextURI.length,str.length-1);
+}
+function check_isArray(object){
+    return Array.isArray(object);
+}
+function check_isUndefined(object) {
+    return object === undefined;
+}
+function check_isString(object) {
+    return typeof object === "string"
+}
+function writeDataInLocalFile(outputPath, data){
+    console.log("writing data into "+PATH_OUTPUT_DIRECTORY+"/"+outputPath+" .");
+    fs.writeFileSync(PATH_OUTPUT_DIRECTORY+"/"+outputPath, data , 'utf-8');
+}
+function cloneJSON(json){
+    return JSON.parse(JSON.stringify(json));
+}
+
+/*
+ ===============
+ Debug functions
+ ===============
+ */
+
 function outputMemory() {
     writeDataInLocalFile("memory_classes.json",stringifyJSON(memory_classes));
     writeDataInLocalFile("memory_properties.json",stringifyJSON(memory_properties));
     writeDataInLocalFile("memory_dataTypes.json",stringifyJSON(memory_dataTypes));
     writeDataInLocalFile("memory_enumerations.json",stringifyJSON(memory_enumerations));
     writeDataInLocalFile("memory_enumerationMembers.json",stringifyJSON(memory_enumerationMembers));
+}
+function printOccurrencesNumberOfPropertyOfArray(array,property) {
+    let resultArr = {};
+    for(i=0;i<array.length;i++){
+        let actType = array[i][property];
+        if(resultArr[actType]>0){
+            resultArr[actType] = resultArr[actType] + 1;
+        } else {
+            resultArr[actType] = 1 ;
+        }
+    }
+    print("d",stringifyJSON(resultArr));
+}
+function printArrayOccurrences(array, property) {
+    for(i=0;i<array.length;i++){
+        let actDataRow = array[i];
+        if(Array.isArray(actDataRow[property])){
+            print("d","Object '"+JSON.stringify(actDataRow)+"' has array for "+property);
+        }
+    }
+}
+function printAmountOfPropertiesForObject(arr, name) {
+    print("d","Object '"+name+"' has "+Object.keys(arr).length+" properties.");
+}
+function printErrorLog(errors) {
+    for(let i=0; i < errors.length; i++){
+        print("d",errors[i].message+"\nPayload: "+JSON.stringify(errors[i].payload));
+    }
 }
