@@ -16,7 +16,6 @@ sdoConverter.set_memory_data('memory_enumerations', require('../data/sdo_enumera
 sdoConverter.set_memory_data('memory_enumerationMembers', require('../data/sdo_enumerationMembers.json'));
 sdoConverter.materialize_classesMaterialized();
 let ClassesObject = sdoConverter.get_allClassesMaterialized();
-
 */
 
 //singleton Object

@@ -1,18 +1,24 @@
 {
-  "name": "schema_org_jsonld_transformator",
+  "name": "SDO-Converter",
   "version": "1.0.0",
-  "description": "Takes the schema.jsonld file from schema.org and transforms the data into several json files containing scructured representations about the schema, its classes and properties.",
+  "description": "Takes the schema.jsonld file from schema.org (SDO) and converts the data into several json files containing scructured representations about the schema, its classes and properties. Also provides a library showing how applications can consume the produced json files to use schema.org data.",
   "main": "transform.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node transform.js"
   },
   "keywords": [
-    "jsonld",
-    "json",
     "schema",
     "org",
+    "converter",
+    "sdo-converter",
+    "jsonld",
+    "json",
     "transformator"
   ],
+  "repository":{
+    "type": "git",
+    "url": "https://github.com/semantifyit/SDO-Converter"
+  },
   "author": "Omar J. Aviles Holzknecht",
   "license": "MIT",
   "dependencies": {
