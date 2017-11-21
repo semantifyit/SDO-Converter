@@ -115,7 +115,7 @@ function startProcessTransformJSONLD(){
  */
 //checks the dataRows and classifies them in the corresponding category
 function classifyInput() {
-    for(i=0;i<inputDataRows.length;i++){
+    for(let i=0;i<inputDataRows.length;i++){
         //check @type of the dataRow
         let type = inputDataRows[i]["@type"];
         //if @type is an Array
@@ -436,7 +436,7 @@ function extractDataTypesFromClasses() {
     }
 }
 
-//remove classes which are black listed (because eg. they belong to meta data, it doesnt make sense to use them?)
+//remove classes which are black listed (because eg. they belong to meta data, it does not make sense to use them?)
 function removeBlackListedClasses() {
     let blackListenedClasses = [
         "Enumeration", "DataType", "Intangible"
@@ -757,7 +757,7 @@ function exportErrorFiles(){
 
 //export the meta data as file
 function exportMetaFiles() {
-    var outputString = "";
+    let outputString = "";
     outputString = outputString.concat("Amount of @graph nodes: "+inputDataRows.length);
     outputString = outputString.concat("\nAmount of @graph nodes with errors: "+COUNTER_DATAROW_ERROR);
 
@@ -841,7 +841,7 @@ function outputMemory() {
 }
 function printOccurrencesNumberOfPropertyOfArray(array,property) {
     let resultArr = {};
-    for(i=0;i<array.length;i++){
+    for(let i=0;i<array.length;i++){
         let actType = array[i][property];
         if(resultArr[actType]>0){
             resultArr[actType] = resultArr[actType] + 1;
@@ -852,7 +852,7 @@ function printOccurrencesNumberOfPropertyOfArray(array,property) {
     print("d",stringifyJSON(resultArr));
 }
 function printArrayOccurrences(array, property) {
-    for(i=0;i<array.length;i++){
+    for(let i=0;i<array.length;i++){
         let actDataRow = array[i];
         if(Array.isArray(actDataRow[property])){
             print("d","Object '"+JSON.stringify(actDataRow)+"' has array for "+property);

@@ -101,8 +101,8 @@ var sdoConverter = new function () {
         if(superClasses.length === 0){
             return resultContainer;
         }
-        for(let i=0;i<superClasses.length;i++){
-            let actSuperClass = this.memory_classesMaterialized[superClasses[i]];
+        for(var i=0;i<superClasses.length;i++){
+            var actSuperClass = this.memory_classesMaterialized[superClasses[i]];
             if(actSuperClass !== undefined){
                 //add properties of superclass
                 if(check_isArray(actSuperClass.properties)){
@@ -128,10 +128,10 @@ var sdoConverter = new function () {
     }
     //compares the values of an array an removes duplicates
     function uniquifyArray(array) {
-        let seen = {};
-        let result = [];
-        for(let i = 0; i < array.length; i++) {
-            let item = array[i];
+        var seen = {};
+        var result = [];
+        for(var i = 0; i < array.length; i++) {
+            var item = array[i];
             if(seen[item] !== 1) {
                 seen[item] = 1;
                 result.push(item);
