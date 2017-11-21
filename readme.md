@@ -16,7 +16,7 @@ In the project's folder to start the tool:
 ```bash
 node transform.js
 ```
-###Output
+### Output
 The **data_output** directory will contain following files:
 
 * **sdo_classes.json** - Contains the classes (types) of SDO with their characteristics. 
@@ -28,7 +28,7 @@ The **data_output** directory will contain following files:
 
 There are also minified versions of the files (eg.: **sdo_classes.min.json**).
 
-###Usage of data
+### Usage of data
 
 The user can load this data in any way he wishes. However this project provides a small [library](sdo-converter-lib.js) to load and materialize the SDO data in the target application. The possibility to execute the materialization on the target application increases the performance of the application (load small data files, fast creation of materialized objects). This library is usable in browsers and in node.js.
 
@@ -113,6 +113,6 @@ function callbackAfterLoading() {
 }
 ```
 
-###License
+### License
 
 MIT © [Omar J. A. Holzknecht](http://nicarao.eu/)
