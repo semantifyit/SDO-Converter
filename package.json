@@ -1,5 +1,5 @@
 {
-  "name": "SDO-Converter",
+  "name": "sdo-converter",
   "version": "1.0.0",
   "description": "Takes the schema.jsonld file from schema.org (SDO) and converts the data into several json files containing scructured representations about the schema, its classes and properties. Also provides a library showing how applications can consume the produced json files to use schema.org data.",
   "main": "transform.js",
