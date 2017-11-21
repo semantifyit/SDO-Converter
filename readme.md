@@ -112,3 +112,7 @@ function callbackAfterLoading() {
     var dataType_Text = sdoConverter.get_dataType('Text');
 }
 ```
+
+###License
+
+MIT © [Omar J. A. Holzknecht](http://nicarao.eu/)

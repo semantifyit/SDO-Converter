@@ -33,13 +33,16 @@ var sdoConverter = new function () {
     /*setter and init processes*/
     //set the data for a specific sdo artifact
     this.set_memory_data = function(memoryName, data){
+        if(data === null || data === undefined || data.constructor === "test".constructor || data.constructor === [].constructor){
+            throw new Error('The data provided for "'+memoryName+'" must be a valid JSON Object.');
+        }
         this[memoryName] = data;
     };
     //create the output data for the output file "sdo_classesMaterialized.json"
     this.materialize_classesMaterialized = function(){
         //check if memory has been initialized
         if(this.memory_classes === null || this.memory_properties === null || this.memory_dataTypes === null || this.memory_enumerations === null || this.memory_enumerationMembers === null ){
-            return "Error: Memory for materialization process has not been initialized."
+            throw new Error('Not all memory items for materialization process have been initialized. You have to set the all the memory data first: set_memory_data(memoryName, data)');
         }
         this.memory_classesMaterialized = {};
         //add classes
@@ -143,12 +146,12 @@ var sdoConverter = new function () {
     this.get_class = function(className){
         //check if memory has been initialized
         if(this.memory_classes === null){
-            return "Error: memory_classes has not been initialized."
+            throw new Error('memory_classes has not been initialized. You have to set the the memory data first: set_memory_data("memory_classes", data)');
         }
         var classObj = this.memory_classes[className];
         //check if property exists
         if(classObj === undefined){
-            return "Error: There is no class with name '"+className+"' in the memory.";
+            throw new Error('There is no class with name "'+className+'" in the memory.');
         }
         return classObj;
     };
@@ -156,7 +159,7 @@ var sdoConverter = new function () {
     this.get_allClasses = function(){
         //check if memory has been initialized
         if(this.memory_classes === null){
-            return "Error: memory_classes has not been initialized."
+            throw new Error('memory_classes has not been initialized. You have to set the the memory data first: set_memory_data("memory_classes", data)');
         }
         return this.memory_classes;
     };
@@ -164,12 +167,12 @@ var sdoConverter = new function () {
     this.get_property = function(propertyName){
         //check if memory has been initialized
         if(this.memory_properties === null){
-            return "Error: memory_properties has not been initialized."
+            throw new Error('memory_properties has not been initialized. You have to set the the memory data first: set_memory_data("memory_properties", data)');
         }
         var propertyObj = this.memory_properties[propertyName];
         //check if property exists
         if(propertyObj === undefined){
-            return "Error: There is no property with name '"+propertyName+"' in the memory.";
+            throw new Error('There is no property with name "'+propertyName+'" in the memory.');
         }
         return propertyObj;
     };
@@ -177,7 +180,7 @@ var sdoConverter = new function () {
     this.get_allProperties = function(){
         //check if memory has been initialized
         if(this.memory_properties === null){
-            return "Error: memory_properties has not been initialized."
+            throw new Error('memory_properties has not been initialized. You have to set the the memory data first: set_memory_data("memory_properties", data)');
         }
         return this.memory_properties;
     };
@@ -185,12 +188,12 @@ var sdoConverter = new function () {
     this.get_dataType = function(dataTypeName){
         //check if memory has been initialized
         if(this.memory_dataTypes === null){
-            return "Error: memory_dataTypes has not been initialized."
+            throw new Error('memory_dataTypes has not been initialized. You have to set the the memory data first: set_memory_data("memory_dataTypes", data)');
         }
         var dataTypeObj = this.memory_dataTypes[dataTypeName];
         //check if property exists
         if(dataTypeObj === undefined){
-            return "Error: There is no dataType with name '"+dataTypeName+"' in the memory.";
+            throw new Error('There is no dataType with name "'+dataTypeName+'" in the memory.');
         }
         return dataTypeObj;
     };
@@ -198,7 +201,7 @@ var sdoConverter = new function () {
     this.get_allDataTypes = function(){
         //check if memory has been initialized
         if(this.memory_dataTypes === null){
-            return "Error: memory_dataTypes has not been initialized."
+            throw new Error('memory_dataTypes has not been initialized. You have to set the the memory data first: set_memory_data("memory_dataTypes", data)');
         }
         return this.memory_dataTypes;
     };
@@ -206,12 +209,12 @@ var sdoConverter = new function () {
     this.get_enumeration = function(enumerationName){
         //check if memory has been initialized
         if(this.memory_enumerations === null){
-            return "Error: memory_enumerations has not been initialized."
+            throw new Error('memory_enumerations has not been initialized. You have to set the the memory data first: set_memory_data("memory_enumerations", data)');
         }
         var enumerationObj = this.memory_enumerations[enumerationName];
         //check if property exists
         if(enumerationObj === undefined){
-            return "Error: There is no enumeration with name '"+enumerationName+"' in the memory.";
+            throw new Error('There is no enumeration with name "'+enumerationName+'" in the memory.');
         }
         return enumerationObj;
     };
@@ -219,7 +222,7 @@ var sdoConverter = new function () {
     this.get_allEnumerations = function(){
         //check if memory has been initialized
         if(this.memory_enumerations === null){
-            return "Error: memory_enumerations has not been initialized."
+            throw new Error('memory_enumerations has not been initialized. You have to set the the memory data first: set_memory_data("memory_enumerations", data)');
         }
         return this.memory_enumerations;
     };
@@ -227,12 +230,12 @@ var sdoConverter = new function () {
     this.get_enumerationMember = function(enumerationMemberName){
         //check if memory has been initialized
         if(this.memory_enumerationMembers === null){
-            return "Error: memory_enumerationMembers has not been initialized."
+            throw new Error('memory_enumerationMembers has not been initialized. You have to set the the memory data first: set_memory_data("memory_enumerationMembers", data)');
         }
         var enumerationMemberObj = this.memory_enumerationMembers[enumerationMemberName];
         //check if property exists
         if(enumerationMemberObj === undefined){
-            return "Error: There is no enumerationMember with name '"+enumerationMemberName+"' in the memory.";
+            throw new Error('There is no enumerationMember with name "'+enumerationMemberName+'" in the memory.');
         }
         return enumerationMemberObj;
     };
@@ -240,7 +243,7 @@ var sdoConverter = new function () {
     this.get_allEnumerationMembers = function(){
         //check if memory has been initialized
         if(this.memory_enumerationMembers === null){
-            return "Error: memory_enumerationMembers has not been initialized."
+            throw new Error('memory_enumerationMembers has not been initialized. You have to set the the memory data first: set_memory_data("memory_enumerationMembers", data)');
         }
         return this.memory_enumerationMembers;
     };
@@ -250,12 +253,12 @@ var sdoConverter = new function () {
     this.get_classMaterialized = function(className){
         //check if memory has been initialized
         if(this.memory_classesMaterialized === null){
-            return "Error: memory_classesMaterialized has not been initialized."
+            throw new Error('memory_classesMaterialized has not been initialized. Use the function materialize_classesMaterialized() to initiate.');
         }
         var classObj = this.memory_classesMaterialized[className];
         //check if property exists
         if(classObj === undefined){
-            return "Error: There is no materialized class with name '"+className+"' in the memory.";
+            throw new Error('There is no materialized class with name "'+className+'" in the memory.');
         }
         return classObj;
     };
@@ -263,7 +266,7 @@ var sdoConverter = new function () {
     this.get_allClassesMaterialized = function(){
         //check if memory has been initialized
         if(this.memory_classesMaterialized === null){
-            return "Error: memory_classesMaterialized has not been initialized."
+            throw new Error('memory_classesMaterialized has not been initialized. Use the function materialize_classesMaterialized() to initiate.');
         }
         return this.memory_classesMaterialized;
     };
