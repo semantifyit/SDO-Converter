@@ -4,7 +4,16 @@ Amount of Errors: 37
   {
     "message": "DataRow has no @type.",
     "payload": {
-      "@id": "file:///Users/danbri/sdo/official/schemaorg/data/schema.rdfa",
+      "@id": "http://www.w3.org/ns/regorg#RegisteredOrganization",
+      "http://www.w3.org/2004/02/skos/core#closeMatch": {
+        "@id": "http://schema.org/LocalBusiness"
+      }
+    }
+  },
+  {
+    "message": "DataRow has no @type.",
+    "payload": {
+      "@id": "file:///Users/wallisr/Development/Schema/master/schemaorg/data/schema.rdfa",
       "http://purl.org/dc/terms/source": [
         {
           "@id": "http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#IIT-CNR.it"
@@ -13,15 +22,6 @@ Amount of Errors: 37
           "@id": "http://www.w3.org/wiki/WebSchemas/SchemaDotOrgSources#Tourism"
         }
       ]
-    }
-  },
-  {
-    "message": "DataRow has no @type.",
-    "payload": {
-      "@id": "http://www.w3.org/ns/regorg#RegisteredOrganization",
-      "http://www.w3.org/2004/02/skos/core#closeMatch": {
-        "@id": "http://schema.org/LocalBusiness"
-      }
     }
   },
   {
@@ -40,15 +40,6 @@ Amount of Errors: 37
       "description": "The boolean value true.",
       "type": "EnumerationMember",
       "domainEnumeration": "Boolean"
-    }
-  },
-  {
-    "message": "EnumerationMember has a domain which is not in enumeration memory",
-    "payload": {
-      "name": "rNews",
-      "description": "This class contains derivatives of IPTC rNews properties. rNews is a data model of publishing metadata with serializations currently available for RDFa as well as HTML5 Microdata. More information about the IPTC and rNews can be found at <a href=\"http://rnews.org\">rnews.org</a>.",
-      "type": "EnumerationMember",
-      "domainEnumeration": "Organization"
     }
   },
   {
@@ -108,8 +99,8 @@ Amount of Errors: 37
   {
     "message": "EnumerationMember has a domain which is not in enumeration memory",
     "payload": {
-      "name": "BibExTerm",
-      "description": "The W3C <a href=\"http://www.w3.org/community/schemabibex/\">Schema Bib Extend</a> (BibEx) group led the work to improve schema.org for bibliographic information, including terms for periodicals, articles and multi-volume works. The design was inspired in places (e.g. <a class=\"localLink\" href=\"http://schema.org/pageStart\">pageStart</a>, <a class=\"localLink\" href=\"http://schema.org/pageEnd\">pageEnd</a>, <a class=\"localLink\" href=\"http://schema.org/pagination\">pagination</a>) by the <a href=\"http://bibliontology.com/\">Bibliographic Ontology</a>, 'bibo'.",
+      "name": "WikiDoc",
+      "description": "This class contains information contributed by <a href=\"http://wikidoc.org>WikiDoc\">http://wikidoc.org>WikiDoc</a>.",
       "type": "EnumerationMember",
       "domainEnumeration": "Organization"
     }
@@ -117,8 +108,17 @@ Amount of Errors: 37
   {
     "message": "EnumerationMember has a domain which is not in enumeration memory",
     "payload": {
-      "name": "WikiDoc",
-      "description": "This class contains information contributed by <a href=\"http://wikidoc.org>WikiDoc\">http://wikidoc.org>WikiDoc</a>.",
+      "name": "rNews",
+      "description": "This class contains derivatives of IPTC rNews properties. rNews is a data model of publishing metadata with serializations currently available for RDFa as well as HTML5 Microdata. More information about the IPTC and rNews can be found at <a href=\"http://rnews.org\">rnews.org</a>.",
+      "type": "EnumerationMember",
+      "domainEnumeration": "Organization"
+    }
+  },
+  {
+    "message": "EnumerationMember has a domain which is not in enumeration memory",
+    "payload": {
+      "name": "BibExTerm",
+      "description": "The W3C <a href=\"http://www.w3.org/community/schemabibex/\">Schema Bib Extend</a> (BibEx) group led the work to improve schema.org for bibliographic information, including terms for periodicals, articles and multi-volume works. The design was inspired in places (e.g. <a class=\"localLink\" href=\"http://schema.org/pageStart\">pageStart</a>, <a class=\"localLink\" href=\"http://schema.org/pageEnd\">pageEnd</a>, <a class=\"localLink\" href=\"http://schema.org/pagination\">pagination</a>) by the <a href=\"http://bibliontology.com/\">Bibliographic Ontology</a>, 'bibo'.",
       "type": "EnumerationMember",
       "domainEnumeration": "Organization"
     }
@@ -139,6 +139,15 @@ Amount of Errors: 37
       "description": "The steering position is on the right side of the vehicle (viewed from the main direction of driving).",
       "type": "EnumerationMember",
       "domainEnumeration": "SteeringPositionValue"
+    }
+  },
+  {
+    "message": "EnumerationMember has a domain which is not in enumeration memory",
+    "payload": {
+      "name": "Stack Exchange",
+      "description": "The Question/Answer types were <a href=\"https://www.w3.org/wiki/WebSchemas/QASchemaResearch\">based on</a> the Stack Overflow API.",
+      "type": "EnumerationMember",
+      "domainEnumeration": "Organization"
     }
   },
   {
@@ -243,15 +252,6 @@ Amount of Errors: 37
   {
     "message": "EnumerationMember has a domain which is not in enumeration memory",
     "payload": {
-      "name": "Stack Exchange",
-      "description": "The Question/Answer types were <a href=\"https://www.w3.org/wiki/WebSchemas/QASchemaResearch\">based on</a> the Stack Overflow API.",
-      "type": "EnumerationMember",
-      "domainEnumeration": "Organization"
-    }
-  },
-  {
-    "message": "EnumerationMember has a domain which is not in enumeration memory",
-    "payload": {
       "name": "False",
       "description": "The boolean value false.",
       "type": "EnumerationMember",
@@ -267,10 +267,10 @@ Amount of Errors: 37
       "superProperties": [],
       "subProperties": [],
       "domainClasses": [
-        "CreativeWorkSeries",
-        "DatedMoneySpecification",
-        "Event",
         "CreativeWorkSeason",
+        "Event",
+        "DatedMoneySpecification",
+        "CreativeWorkSeries",
         "Role"
       ],
       "valueTypes": [
@@ -283,7 +283,7 @@ Amount of Errors: 37
     "message": "Property has a domain which is not in classes memory",
     "payload": {
       "name": "currency",
-      "description": "The currency in which the monetary amount is expressed (in 3-letter <a href=\"http://en.wikipedia.org/wiki/ISO_4217\">ISO 4217</a> format).",
+      "description": "The currency in which the monetary amount is expressed.<br/><br/>\n\nUse standard formats: <a href=\"http://en.wikipedia.org/wiki/ISO_4217\">ISO 4217 currency format</a> e.g. \"USD\"; <a href=\"https://en.wikipedia.org/wiki/List_of_cryptocurrencies\">Ticker symbol</a> for cryptocurrencies e.g. \"BTC\"; well known names for <a href=\"https://en.wikipedia.org/wiki/Local_exchange_trading_system\">Local Exchange Tradings Systems</a> (LETS) and other currency types e.g. \"Ithaca HOUR\".",
       "type": "Property",
       "superProperties": [],
       "subProperties": [],
@@ -321,9 +321,9 @@ Amount of Errors: 37
       "superProperties": [],
       "subProperties": [],
       "domainClasses": [
+        "LoanOrCredit",
         "InvestmentOrDeposit",
-        "DatedMoneySpecification",
-        "LoanOrCredit"
+        "DatedMoneySpecification"
       ],
       "valueTypes": [
         "MonetaryAmount",
@@ -341,14 +341,14 @@ Amount of Errors: 37
       "subProperties": [],
       "domainClasses": [
         "Role",
+        "CreativeWorkSeries",
         "DatedMoneySpecification",
         "Event",
-        "CreativeWorkSeries",
         "CreativeWorkSeason"
       ],
       "valueTypes": [
-        "DateTime",
-        "Date"
+        "Date",
+        "DateTime"
       ]
     }
   },
@@ -380,8 +380,8 @@ Amount of Errors: 37
         "UserComments"
       ],
       "valueTypes": [
-        "Date",
-        "DateTime"
+        "DateTime",
+        "Date"
       ]
     }
   },
@@ -394,8 +394,8 @@ Amount of Errors: 37
       "superProperties": [],
       "subProperties": [],
       "domainClasses": [
-        "UserComments",
-        "CreativeWork"
+        "CreativeWork",
+        "UserComments"
       ],
       "valueTypes": [
         "Organization",

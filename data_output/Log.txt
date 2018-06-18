@@ -1,13 +1,13 @@
-Amount of @graph nodes: 1619
+Amount of @graph nodes: 1621
 Amount of @graph nodes with errors: 2
 
-Amount of Classes: 555
-Amount of Properties: 812
+Amount of Classes: 556
+Amount of Properties: 811
 Amount of DataTypes: 9
 Amount of Enumerations: 29
 Amount of EnumerationMembers: 134
 
 Amount of Classes (including Enumerations) superseded: 14
-Amount of Properties superseded: 64
+Amount of Properties superseded: 66
 Amount of DataTypes superseded: 0
 Amount of EnumerationMembers superseded: 0
