@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example</title>
+</head>
+<body style="background-color: #82B1FF;">
+<div style="position: fixed; top: 0; width: 100%; margin: 0; padding: 20px; left: 0; background-color: #1c7fc7; color: white; font-weight: bold; border-bottom: black solid 1px;display: flex;">
+    <div style="width: 45%; text-align: center">
+        <span>Schema.org version: </span>
+        <select style="width: 100px;" onchange="changeVersion(this.value)">
+            <option>latest</option>
+            <option>3.4</option>
+            <option>3.3</option>
+            <option>3.2</option>
+            <option>3.1</option>
+        </select>
+    </div>
+    <div style="width: 45%; text-align: center">
+        <span>Materialized Class: </span>
+        <select id="classSelector" style="width: 200px;" onchange="changeClass(this.value)">
+        </select>
+    </div>
+</div>
+<div style="margin: 100px; background-color: #E3F2FD">
+    <pre style="padding: 30px; line-break: normal; white-space: pre-wrap;" id="container"></pre>
+</div>
+</body>
+<!--INCLUDE THE LIBRARY AS A SCRIPT-->
+<!--AFTER THAT YOU CAN USE THE "sdoLibrary" SINGLETON-->
+<script src="sdoLibrary_browser.js"></script>
+<script>
+    (function () {
+        changeVersion("latest");
+    })();
+
+    function changeVersion(version) {
+        //CHANGES THE SCHEMA.ORG VERSION FOR THE LIBRARY. AFTER THAT ALL RETRIEVING FUNCTIONS WILL CONFORM THE CORRESPONDING VERSION
+        sdoLibrary.setVersion(version);
+        setTimeout(function () {
+            var select = document.getElementById("classSelector");
+            while (select.length > 0) {
+                select.remove(0);
+            }
+            //LOADS ALL CLASSES, ENUMERATIONS, AND DATA TYPES FROM SCHEMA.ORG
+            var listOfClassesMaterialized = sdoLibrary.get_allClassesMaterialized();
+            var classList = Object.keys(listOfClassesMaterialized).sort();
+            for (var i = 0; i < classList.length; i++) {
+                var option = document.createElement("option");
+                option.text = classList[i];
+                select.add(option);
+            }
+            changeClass(classList[0]);
+        }, 1000);
+    }
+
+    function changeClass(Class) {
+        //LOADS A SPECIFIC CLASS/ENUMERATION/DATA TYPE FROM SCHEMA.ORG
+        var classMaterialized = sdoLibrary.get_classMaterialized(Class);
+        document.getElementById("container").innerHTML = JSON.stringify(classMaterialized, null, 2);
+    }
+</script>
+</html>
