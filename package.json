@@ -27,7 +27,6 @@
     "del": "^2.2.2",
     "fs": "0.0.1-security",
     "minimist": "^1.2.0",
-    "request": "^2.88.0",
-    "require": "^2.4.20"
+    "request": "^2.88.0"
   }
 }
