@@ -1,6 +1,6 @@
 {
   "name": "sdo-converter",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Stand-alone JavaScript (JS) tool that converts the vocabulary of Schema.org into easy to use JSON files with a tree-like data model. This tool comes with a JS library (SDO-Library) that uses the previously mentioned JSON files to provide data-retrieving functions for the Schema.org vocabulary.",
   "main": "sdoConverter.js",
   "scripts": {
