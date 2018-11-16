@@ -1,15 +1,4 @@
-/*
- ===============
- transform.js
- ===============
- */
-//include other files
 let fs = require('fs');
-let del = require('del');
-
-//programming objects
-let PATH_INPUT_SCHEMA = "data_input/schema.jsonld";
-let PATH_OUTPUT_DIRECTORY = "data_output";
 
 let inputDataRows = {}; //input data as graph nodes (we call them data rows here)
 let errors = []; //error log
@@ -38,34 +27,40 @@ let outputData_classesMaterialized = {};//sdo_classesMaterialized.jsonld
  Algorithm Start
  ===============
 */
-init();
-function init() {
-    cleanOutputDirectory();
-    //Algorithm Step A
-    startProcessLoadSchemaJSONLD();
-}
 
-//deletes all files in the output directory
-function cleanOutputDirectory(){
-    del.sync([PATH_OUTPUT_DIRECTORY+"/**","!"+PATH_OUTPUT_DIRECTORY]);
-    print("i","All files in output directory '"+PATH_OUTPUT_DIRECTORY+"' deleted.");
-}
+let option_version = "latest";
+let option_minify = true;
+let option_materialize = false;
 
-//Load the Input JSONLD file
-function startProcessLoadSchemaJSONLD(){
-    if(fs.existsSync(PATH_INPUT_SCHEMA)) {
-        fs.readFile(PATH_INPUT_SCHEMA, 'utf8', function (err, data) {
+//programming objects
+let PATH_OUTPUT_DIRECTORY = "data_output";
+
+function convert(output_directory, PATH_INPUT_DIRECTORY, version, minify, materialize) {
+    //set option variables
+    option_version = version;
+    option_minify = minify;
+    option_materialize = materialize;
+    PATH_OUTPUT_DIRECTORY = output_directory + "/" + version;
+    if (fs.existsSync(PATH_INPUT_DIRECTORY + "/" + version + "/schema.jsonld")) {
+        //create output folder if not existent
+        if (!fs.existsSync(output_directory + "/" + version)) {
+            fs.mkdirSync(output_directory + "/" + version);
+        }
+        fs.readFile(PATH_INPUT_DIRECTORY + "/" + version + "/schema.jsonld", 'utf8', function (err, data) {
             inputDataRows = JSON.parse(data);
             inputDataRows = inputDataRows["@graph"];
             startProcessTransformJSONLD();
         });
     } else {
-        print("e", "Could not find input file '"+PATH_INPUT_SCHEMA+"'. Please change the let PATH_INPUT_SCHEMA or put the JSON-LD File in that path (you can download the latest version from http://schema.org/docs/developers.html#formats)");
+        print("e", "Could not find input file at '" + PATH_INPUT_DIRECTORY + "/" + version + "/schema.jsonld'. Is your input version correct?");
     }
 }
 
+module.exports = convert;
+
+
 //Starts the transformation and generation of data.
-function startProcessTransformJSONLD(){
+function startProcessTransformJSONLD() {
 
     //Algorithm Step B
     classifyInput();
@@ -92,18 +87,24 @@ function startProcessTransformJSONLD(){
     //Algorithm Step E.3
     relationships_fillProperties();
 
-    //Algorithm Step F.1
-    outputCreate_classes();
-    outputCreate_properties();
-    outputCreate_dataTypes();
-    outputCreate_enumerations();
-    outputCreate_enumerationMembers();
-    //Algorithm Step F.2
-    outputCreate_classesMaterialized();
+    if (option_materialize === false) {
+        //Algorithm Step F.1
+        outputCreate_classes();
+        outputCreate_properties();
+        outputCreate_dataTypes();
+        outputCreate_enumerations();
+        outputCreate_enumerationMembers();
+    } else {
+        //Algorithm Step F.2
+        outputCreate_classesMaterialized();
+    }
 
     //Algorithm Step G.
-    exportOutputFiles();
-    exportMinifiedOutputFiles();
+    if (option_minify === false) {
+        exportOutputFiles();
+    } else {
+        exportMinifiedOutputFiles();
+    }
     exportErrorFiles();
     exportMetaFiles();
 }
@@ -113,21 +114,22 @@ function startProcessTransformJSONLD(){
  Main Processes
  ===============
  */
+
 //checks the dataRows and classifies them in the corresponding category
 function classifyInput() {
-    for(let i=0;i<inputDataRows.length;i++){
+    for (let i = 0; i < inputDataRows.length; i++) {
         //check @type of the dataRow
         let type = inputDataRows[i]["@type"];
         //if @type is an Array
-        if(check_isArray(type)){
+        if (check_isArray(type)) {
             let isDataType = false;
-            for(let j=0;j<type.length;j++) {
+            for (let j = 0; j < type.length; j++) {
                 if (type[j] === "http://schema.org/DataType") {
                     isDataType = true;
                     break;
                 }
             }
-            if(isDataType === true) {
+            if (isDataType === true) {
                 //add to DataType collection
                 addDataType(inputDataRows[i]);
             } else {
@@ -140,7 +142,7 @@ function classifyInput() {
             }
         } else if (check_isString(type)) {
             //@type is a string
-            switch (type){
+            switch (type) {
                 case "rdfs:Class":
                     addClass(inputDataRows[i]);
                     break;
@@ -156,7 +158,7 @@ function classifyInput() {
                     break;
                 default:
                     //enumeration member
-                    if(type.substring(0,("http://schema.org/".length)) === "http://schema.org/") {
+                    if (type.substring(0, ("http://schema.org/".length)) === "http://schema.org/") {
                         addEnumerationMember(inputDataRows[i]);
                     } else {
                         //expected to be an error in the file
@@ -187,8 +189,8 @@ function classifyInput() {
 }
 
 //checks if a data row for a class should create an entry in the memory and executes the process if needed
-function addClass(classDataRow){
-    if(!check_isUndefined(classDataRow["http://schema.org/supersededBy"])){
+function addClass(classDataRow) {
+    if (!check_isUndefined(classDataRow["http://schema.org/supersededBy"])) {
         // If this class has the supersededBy property, it should not be added since this class should not be used for new annotations
         COUNTER_DATAROW_CLASS_SUPERSEDED++;
         return false;
@@ -215,7 +217,7 @@ function addClass(classDataRow){
             }
             for (let i = 0; i < superClasses.length; i++) {
                 let actSuperClass = clipURIString(superClasses[i]["@id"]);
-                if(actSuperClass !== ""){
+                if (actSuperClass !== "") {
                     classObject.superClasses.push(actSuperClass);
                 }
             }
@@ -232,8 +234,8 @@ function addClass(classDataRow){
 }
 
 //checks if a data row for an enumeration member should create an entry in the memory and executes the process if needed
-function addEnumerationMember(enumerationMemberDataRow){
-    if(!check_isUndefined(enumerationMemberDataRow["http://schema.org/supersededBy"])){
+function addEnumerationMember(enumerationMemberDataRow) {
+    if (!check_isUndefined(enumerationMemberDataRow["http://schema.org/supersededBy"])) {
         // If this enumeration has the supersededBy property, it should not be added since this enumeration should not be used for new annotations
         COUNTER_DATAROW_ENUMERATIONMEMBER_SUPERSEDED++;
         return false;
@@ -269,8 +271,8 @@ function addEnumerationMember(enumerationMemberDataRow){
 }
 
 //checks if a data row for a dataType should create an entry in the memory and executes the process if needed
-function addDataType(dataTypeDataRow){
-    if(!check_isUndefined(dataTypeDataRow["http://schema.org/supersededBy"])){
+function addDataType(dataTypeDataRow) {
+    if (!check_isUndefined(dataTypeDataRow["http://schema.org/supersededBy"])) {
         // If this dataType has the supersededBy property, it should not be added since this data type should not be used for new annotations
         COUNTER_DATAROW_DATATYPE_SUPERSEDED++;
         return false;
@@ -282,7 +284,7 @@ function addDataType(dataTypeDataRow){
         dataTypeObject.name = dataTypeDataRow["rdfs:label"];
         dataTypeObject.description = dataTypeDataRow["rdfs:comment"];
         dataTypeObject.type = "DataType";
-        dataTypeObject.superClasses = [];
+        dataTypeObject.superClasses = ["DataType"];
         dataTypeObject.subClasses = [];
         let actClassParentsObj = dataTypeDataRow["rdfs:subClassOf"];
         if (!check_isUndefined(actClassParentsObj)) {
@@ -297,7 +299,7 @@ function addDataType(dataTypeDataRow){
             }
             for (let i = 0; i < superClasses.length; i++) {
                 let actSuperClass = clipURIString(superClasses[i]["@id"]);
-                if(actSuperClass !== ""){
+                if (actSuperClass !== "") {
                     dataTypeObject.superClasses.push(actSuperClass);
                 }
             }
@@ -314,8 +316,8 @@ function addDataType(dataTypeDataRow){
 }
 
 //checks if a data row for a property should create an entry in the memory and executes the process if needed
-function addProperty(propertyDataRow){
-    if(!check_isUndefined(propertyDataRow["http://schema.org/supersededBy"])){
+function addProperty(propertyDataRow) {
+    if (!check_isUndefined(propertyDataRow["http://schema.org/supersededBy"])) {
         // If this class has the supersededBy property, it should not be added since this property should not be used for new annotations
         COUNTER_DATAROW_PROPERTY_SUPERSEDED++;
         return false;
@@ -344,7 +346,7 @@ function addProperty(propertyDataRow){
             }
             for (let i = 0; i < superProperties.length; i++) {
                 let actSuperProperty = clipURIString(superProperties[i]["@id"]);
-                if(actSuperProperty !== ""){
+                if (actSuperProperty !== "") {
                     propertyObject.superProperties.push(actSuperProperty);
                 }
             }
@@ -395,10 +397,10 @@ function extractEnumerationFromClasses() {
     let counterChanges = 0;
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
-        let actClass =  memory_classes[keyArray[i]];
+        let actClass = memory_classes[keyArray[i]];
         for (let j = 0; j < actClass["superClasses"].length; j++) { //only "Thing" has no superClasses
             //Enumerations have only 1 superclass -> "Enumeration"
-            if(actClass["superClasses"][j] === "Enumeration"){
+            if (actClass["superClasses"][j] === "Enumeration") {
                 //this class is an enumeration
                 actClass.type = "Enumeration";
                 actClass.enumerationMembers = [];
@@ -409,7 +411,7 @@ function extractEnumerationFromClasses() {
             }
         }
     }
-    if(counterChanges > 0){
+    if (counterChanges > 0) {
         extractEnumerationFromClasses(); //do again until there are no changes
     }
 }
@@ -419,9 +421,9 @@ function extractDataTypesFromClasses() {
     let counterChanges = 0;
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
-        let actClass =  memory_classes[keyArray[i]];
+        let actClass = memory_classes[keyArray[i]];
         for (let j = 0; j < actClass["superClasses"].length; j++) { //only "Thing" has no superClasses
-            if(!check_isUndefined(memory_dataTypes[actClass["superClasses"][j]])){
+            if (!check_isUndefined(memory_dataTypes[actClass["superClasses"][j]])) {
                 //this class is subclass of a dataType
                 actClass.type = "DataType";
                 memory_dataTypes[keyArray[i]] = actClass;
@@ -431,7 +433,7 @@ function extractDataTypesFromClasses() {
             }
         }
     }
-    if(counterChanges > 0){
+    if (counterChanges > 0) {
         extractDataTypesFromClasses(); //do again until there are no changes
     }
 }
@@ -443,7 +445,7 @@ function removeBlackListedClasses() {
     ];
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
-        if(blackListenedClasses.indexOf(keyArray[i]) >= 0 ){
+        if (blackListenedClasses.indexOf(keyArray[i]) >= 0) {
             //class is blacklisted, remove from classList
             delete memory_classes[keyArray[i]];
         }
@@ -454,13 +456,13 @@ function removeBlackListedClasses() {
 function inheritance_classes() {
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
-        let actSubClass =  memory_classes[keyArray[i]];
+        let actSubClass = memory_classes[keyArray[i]];
         for (let j = 0; j < actSubClass["superClasses"].length; j++) {
             let actSuperClassName = actSubClass["superClasses"][j];
-            if(!check_isUndefined(memory_classes[actSuperClassName])){
+            if (!check_isUndefined(memory_classes[actSuperClassName])) {
                 //add only if class is available
                 memory_classes[actSuperClassName]["subClasses"].push(actSubClass.name);
-            } else if(!check_isUndefined(memory_enumerations[actSuperClassName])){
+            } else if (!check_isUndefined(memory_enumerations[actSuperClassName])) {
                 //add only if enumeration is available
                 memory_enumerations[actSuperClassName]["subClasses"].push(actSubClass.name);
             } else {
@@ -469,7 +471,7 @@ function inheritance_classes() {
                     "message": "Class has a superClass which is not in classes memory nor in enumerations memory.",
                     "payload": actSubClass
                 });
-                print("d"," inheritance_classes "+JSON.stringify(actSubClass.name)+" - "+actSuperClassName);
+                print("d", " inheritance_classes " + JSON.stringify(actSubClass.name) + " - " + actSuperClassName);
             }
         }
     }
@@ -479,13 +481,13 @@ function inheritance_classes() {
 function inheritance_enumerations() {
     let keyArray = Object.keys(memory_enumerations);
     for (let i = 0; i < keyArray.length; i++) {
-        let actSubClass =  memory_enumerations[keyArray[i]];
+        let actSubClass = memory_enumerations[keyArray[i]];
         for (let j = 0; j < actSubClass["superClasses"].length; j++) {
             let actSuperClassName = actSubClass["superClasses"][j];
-            if(!check_isUndefined(memory_classes[actSuperClassName])){
+            if (!check_isUndefined(memory_classes[actSuperClassName])) {
                 //add only if class is available
                 memory_classes[actSuperClassName]["subClasses"].push(actSubClass.name);
-            } else if(!check_isUndefined(memory_enumerations[actSuperClassName])){
+            } else if (!check_isUndefined(memory_enumerations[actSuperClassName])) {
                 //add only if enumeration is available
                 memory_enumerations[actSuperClassName]["subClasses"].push(actSubClass.name);
             } else {
@@ -494,20 +496,23 @@ function inheritance_enumerations() {
                     "message": "Enumeration has a superClass which is not in classes memory nor in enumerations memory.",
                     "payload": actSubClass
                 });
-                print("d"," inheritance_enumerations "+JSON.stringify(actSubClass.name)+" - "+actSuperClassName);
+                print("d", " inheritance_enumerations " + JSON.stringify(actSubClass.name) + " - " + actSuperClassName);
             }
         }
     }
 }
 
-//check superclasses for all dataTypes and add these dataTypes as subclasses for the parent dataTypes
+//check superclasses for all dataTypes and add these dataTypes as subclasses for the parent dataTypes/classes (class should be only "DataType")
 function inheritance_dataTypes() {
     let keyArray = Object.keys(memory_dataTypes);
     for (let i = 0; i < keyArray.length; i++) {
-        let actDataType =  memory_dataTypes[keyArray[i]];
+        let actDataType = memory_dataTypes[keyArray[i]];
         for (let j = 0; j < actDataType["superClasses"].length; j++) {
             let actSuperClassName = actDataType["superClasses"][j];
-            if(!check_isUndefined(memory_dataTypes[actSuperClassName])){
+            if (!check_isUndefined(memory_classes[actSuperClassName])) {
+                //add only if class is available
+                memory_classes[actSuperClassName]["subClasses"].push(actDataType.name);
+            } else if (!check_isUndefined(memory_dataTypes[actSuperClassName])) {
                 //add only if class is available
                 memory_dataTypes[actSuperClassName]["subClasses"].push(actDataType.name);
             } else {
@@ -516,7 +521,7 @@ function inheritance_dataTypes() {
                     "message": "DataType has a superClass which is not in dataTypes memory.",
                     "payload": actDataType
                 });
-                print("d"," inheritance_dataTypes "+JSON.stringify(actDataType.name)+" - "+actSuperClassName);
+                print("d", " inheritance_dataTypes " + JSON.stringify(actDataType.name) + " - " + actSuperClassName);
             }
         }
     }
@@ -526,10 +531,10 @@ function inheritance_dataTypes() {
 function inheritance_properties() {
     let keyArray = Object.keys(memory_properties);
     for (let i = 0; i < keyArray.length; i++) {
-        let actProperty =  memory_properties[keyArray[i]];
+        let actProperty = memory_properties[keyArray[i]];
         for (let j = 0; j < actProperty["superProperties"].length; j++) {
             let actSuperPropertyName = actProperty["superProperties"][j];
-            if(!check_isUndefined(memory_properties[actSuperPropertyName])){
+            if (!check_isUndefined(memory_properties[actSuperPropertyName])) {
                 //add only if class is available
                 memory_properties[actSuperPropertyName]["subProperties"].push(actProperty.name);
             } else {
@@ -538,7 +543,7 @@ function inheritance_properties() {
                     "message": "Property has a superProperty which is not in properties memory.",
                     "payload": actProperty
                 });
-                print("d"," inheritance_properties "+JSON.stringify(actProperty.name)+" - "+actSuperPropertyName);
+                print("d", " inheritance_properties " + JSON.stringify(actProperty.name) + " - " + actSuperPropertyName);
             }
         }
     }
@@ -558,8 +563,8 @@ function relationships_enumerations() {
     let keyArray = Object.keys(memory_enumerationMembers);
     for (let i = 0; i < keyArray.length; i++) {
         //check the domain enumerations for all enumerationMembers
-        let actEnumerationMember =  memory_enumerationMembers[keyArray[i]];
-        if(!check_isUndefined(memory_enumerations[actEnumerationMember.domainEnumeration])){
+        let actEnumerationMember = memory_enumerationMembers[keyArray[i]];
+        if (!check_isUndefined(memory_enumerations[actEnumerationMember.domainEnumeration])) {
             //add only if class is available
             memory_enumerations[actEnumerationMember.domainEnumeration]["enumerationMembers"].push(keyArray[i]);
         } else {
@@ -584,13 +589,13 @@ function relationships_fillProperties() {
     let keyArray = Object.keys(memory_properties);
     for (let i = 0; i < keyArray.length; i++) {
         //check the domainClasses for all properties
-        let actProperty =  memory_properties[keyArray[i]];
+        let actProperty = memory_properties[keyArray[i]];
         for (let j = 0; j < actProperty["domainClasses"].length; j++) {
             let actDomainName = actProperty["domainClasses"][j];
-            if(!check_isUndefined(memory_classes[actDomainName])){
+            if (!check_isUndefined(memory_classes[actDomainName])) {
                 //add only if class is available
                 memory_classes[actDomainName]["properties"].push(keyArray[i]);
-            } else if(!check_isUndefined(memory_enumerations[actDomainName])){
+            } else if (!check_isUndefined(memory_enumerations[actDomainName])) {
                 //add only if class is available
                 memory_enumerations[actDomainName]["properties"].push(keyArray[i]);
             } else {
@@ -606,7 +611,7 @@ function relationships_fillProperties() {
 }
 
 //create the output data for the output file "sdo_classes.json"
-function outputCreate_classes(){
+function outputCreate_classes() {
     //this function can be seen as an template if there may be a need to rearrange/rename data fields
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
@@ -615,7 +620,7 @@ function outputCreate_classes(){
 }
 
 //create the output data for the output file "sdo_properties.json"
-function outputCreate_properties(){
+function outputCreate_properties() {
     //this function can be seen as an template if there may be a need to rearrange/rename data fields
     let keyArray = Object.keys(memory_properties);
     for (let i = 0; i < keyArray.length; i++) {
@@ -624,7 +629,7 @@ function outputCreate_properties(){
 }
 
 //create the output data for the output file "sdo_dataTypes.json"
-function outputCreate_dataTypes(){
+function outputCreate_dataTypes() {
     //this function can be seen as an template if there may be a need to rearrange/rename data fields
     let keyArray = Object.keys(memory_dataTypes);
     for (let i = 0; i < keyArray.length; i++) {
@@ -633,7 +638,7 @@ function outputCreate_dataTypes(){
 }
 
 //create the output data for the output file "sdo_enumerations.json"
-function outputCreate_enumerations(){
+function outputCreate_enumerations() {
     //this function can be seen as an template if there may be a need to rearrange/rename data fields
     let keyArray = Object.keys(memory_enumerations);
     for (let i = 0; i < keyArray.length; i++) {
@@ -642,7 +647,7 @@ function outputCreate_enumerations(){
 }
 
 //create the output data for the output file "sdo_enumerationMembers.json"
-function outputCreate_enumerationMembers(){
+function outputCreate_enumerationMembers() {
     //this function can be seen as an template if there may be a need to rearrange/rename data fields
     let keyArray = Object.keys(memory_enumerationMembers);
     for (let i = 0; i < keyArray.length; i++) {
@@ -651,7 +656,7 @@ function outputCreate_enumerationMembers(){
 }
 
 //create the output data for the output file "sdo_classesMaterialized.json"
-function outputCreate_classesMaterialized(){
+function outputCreate_classesMaterialized() {
     //add classes
     let keyArray = Object.keys(memory_classes);
     for (let i = 0; i < keyArray.length; i++) {
@@ -670,8 +675,8 @@ function outputCreate_classesMaterialized(){
     //inheritance of properties from superclasses
     keyArray = Object.keys(outputData_classesMaterialized);
     for (let i = 0; i < keyArray.length; i++) {
-        if( outputData_classesMaterialized[keyArray[i]].type === "Class" || outputData_classesMaterialized[keyArray[i]].type === "Enumeration"){
-            let properties =   outputData_classesMaterialized[keyArray[i]].properties;
+        if (outputData_classesMaterialized[keyArray[i]].type === "Class" || outputData_classesMaterialized[keyArray[i]].type === "Enumeration") {
+            let properties = outputData_classesMaterialized[keyArray[i]].properties;
             let superClasses = outputData_classesMaterialized[keyArray[i]].superClasses;
             outputData_classesMaterialized[keyArray[i]].properties = uniquifyArray(rec_retrievePropertiesOfParents(superClasses, properties));
         }
@@ -679,8 +684,8 @@ function outputCreate_classesMaterialized(){
     //materialize properties
     keyArray = Object.keys(outputData_classesMaterialized);
     for (let i = 0; i < keyArray.length; i++) {
-        if( outputData_classesMaterialized[keyArray[i]].type === "Class" || outputData_classesMaterialized[keyArray[i]].type === "Enumeration"){
-            let properties =   outputData_classesMaterialized[keyArray[i]].properties;
+        if (outputData_classesMaterialized[keyArray[i]].type === "Class" || outputData_classesMaterialized[keyArray[i]].type === "Enumeration") {
+            let properties = outputData_classesMaterialized[keyArray[i]].properties;
             let materializedProperties = [];
             for (let j = 0; j < properties.length; j++) {
                 materializedProperties.push(memory_properties[properties[j]]);
@@ -691,7 +696,7 @@ function outputCreate_classesMaterialized(){
     //materialize enumerationMembers
     keyArray = Object.keys(outputData_classesMaterialized);
     for (let i = 0; i < keyArray.length; i++) {
-        if(outputData_classesMaterialized[keyArray[i]].type === "Enumeration"){
+        if (outputData_classesMaterialized[keyArray[i]].type === "Enumeration") {
             let enumerationMembers = outputData_classesMaterialized[keyArray[i]].enumerationMembers;
             let materializedEnumerationMembers = [];
             for (let j = 0; j < enumerationMembers.length; j++) {
@@ -705,15 +710,15 @@ function outputCreate_classesMaterialized(){
 //recursive function which retrieves the properties of all superClasses of a Class/DataType/Enumeration
 //superClasses and resultContainer are Arrays
 function rec_retrievePropertiesOfParents(superClasses, resultContainer) {
-    if(superClasses.length === 0){
+    if (superClasses.length === 0) {
         return resultContainer;
     }
-    for(let i=0;i<superClasses.length;i++){
+    for (let i = 0; i < superClasses.length; i++) {
         let actSuperClass = outputData_classesMaterialized[superClasses[i]];
-        if(actSuperClass !== undefined){
+        if (actSuperClass !== undefined) {
             //add properties of superclass
-            if(check_isArray(actSuperClass.properties)){
-                if(actSuperClass.length !== 0){
+            if (check_isArray(actSuperClass.properties)) {
+                if (actSuperClass.length !== 0) {
                     resultContainer.push.apply(resultContainer, actSuperClass.properties);
                 }
             }
@@ -724,55 +729,61 @@ function rec_retrievePropertiesOfParents(superClasses, resultContainer) {
                 "message": "Entry in outputData_classesMaterialized has a superClass which is not in the set.",
                 "payload": superClasses[i]
             });
-            console.log("d","rec_retrievePropertiesOfParents "+superClasses[i]);
+            console.log("d", "rec_retrievePropertiesOfParents " + superClasses[i]);
         }
     }
     return resultContainer;
 }
 
 //export the output data files
-function exportOutputFiles(){
-    writeDataInLocalFile("sdo_classes.json",stringifyJSON(outputData_classes));
-    writeDataInLocalFile("sdo_properties.json",stringifyJSON(outputData_properties));
-    writeDataInLocalFile("sdo_dataTypes.json",stringifyJSON(outputData_dataTypes));
-    writeDataInLocalFile("sdo_enumerations.json",stringifyJSON(outputData_enumerations));
-    writeDataInLocalFile("sdo_enumerationMembers.json",stringifyJSON(outputData_enumerationMembers));
-    writeDataInLocalFile("sdo_classesMaterialized.json",stringifyJSON(outputData_classesMaterialized));
+function exportOutputFiles() {
+    if (option_materialize === false) {
+        writeDataInLocalFile("sdo_classes.json", stringifyJSON(outputData_classes));
+        writeDataInLocalFile("sdo_properties.json", stringifyJSON(outputData_properties));
+        writeDataInLocalFile("sdo_dataTypes.json", stringifyJSON(outputData_dataTypes));
+        writeDataInLocalFile("sdo_enumerations.json", stringifyJSON(outputData_enumerations));
+        writeDataInLocalFile("sdo_enumerationMembers.json", stringifyJSON(outputData_enumerationMembers));
+    } else {
+        writeDataInLocalFile("sdo_classesMaterialized.json", stringifyJSON(outputData_classesMaterialized));
+    }
 }
 
 //export a minified version of the output data files
 function exportMinifiedOutputFiles() {
-    writeDataInLocalFile("sdo_classes.min.json",JSON.stringify(outputData_classes, null, 0));
-    writeDataInLocalFile("sdo_properties.min.json",JSON.stringify(outputData_properties, null, 0));
-    writeDataInLocalFile("sdo_dataTypes.min.json",JSON.stringify(outputData_dataTypes, null, 0));
-    writeDataInLocalFile("sdo_enumerations.min.json",JSON.stringify(outputData_enumerations, null, 0));
-    writeDataInLocalFile("sdo_enumerationMembers.min.json",JSON.stringify(outputData_enumerationMembers, null, 0));
-    writeDataInLocalFile("sdo_classesMaterialized.min.json",JSON.stringify(outputData_classesMaterialized, null, 0));
+    if (option_materialize === false) {
+        writeDataInLocalFile("sdo_classes.json", JSON.stringify(outputData_classes, null, 0));
+        writeDataInLocalFile("sdo_properties.json", JSON.stringify(outputData_properties, null, 0));
+        writeDataInLocalFile("sdo_dataTypes.json", JSON.stringify(outputData_dataTypes, null, 0));
+        writeDataInLocalFile("sdo_enumerations.json", JSON.stringify(outputData_enumerations, null, 0));
+        writeDataInLocalFile("sdo_enumerationMembers.json", JSON.stringify(outputData_enumerationMembers, null, 0));
+    } else {
+        writeDataInLocalFile("sdo_classesMaterialized.json", JSON.stringify(outputData_classesMaterialized, null, 0));
+    }
 }
 
 //export the error files
-function exportErrorFiles(){
-    writeDataInLocalFile("ErrorLog.txt","Amount of Errors: "+errors.length+"\n\n"+stringifyJSON(errors));
+function exportErrorFiles() {
+    writeDataInLocalFile("ErrorLog.txt", "Amount of Errors: " + errors.length + "\n\n" + stringifyJSON(errors));
 }
 
 //export the meta data as file
 function exportMetaFiles() {
     let outputString = "";
-    outputString = outputString.concat("Amount of @graph nodes: "+inputDataRows.length);
-    outputString = outputString.concat("\nAmount of @graph nodes with errors: "+COUNTER_DATAROW_ERROR);
+    outputString = outputString.concat("Amount of @graph nodes: " + inputDataRows.length);
+    outputString = outputString.concat("\nAmount of @graph nodes with errors: " + COUNTER_DATAROW_ERROR);
 
-    outputString = outputString.concat("\n\nAmount of Classes: "+Object.keys(memory_classes).length);
-    outputString = outputString.concat("\nAmount of Properties: "+Object.keys(memory_properties).length);
-    outputString = outputString.concat("\nAmount of DataTypes: "+Object.keys(memory_dataTypes).length);
-    outputString = outputString.concat("\nAmount of Enumerations: "+Object.keys(memory_enumerations).length);
-    outputString = outputString.concat("\nAmount of EnumerationMembers: "+Object.keys(memory_enumerationMembers).length);
+    outputString = outputString.concat("\n\nAmount of Classes: " + Object.keys(memory_classes).length);
+    outputString = outputString.concat("\nAmount of Properties: " + Object.keys(memory_properties).length);
+    outputString = outputString.concat("\nAmount of DataTypes: " + Object.keys(memory_dataTypes).length);
+    outputString = outputString.concat("\nAmount of Enumerations: " + Object.keys(memory_enumerations).length);
+    outputString = outputString.concat("\nAmount of EnumerationMembers: " + Object.keys(memory_enumerationMembers).length);
 
-    outputString = outputString.concat("\n\nAmount of Classes (including Enumerations) superseded: "+COUNTER_DATAROW_CLASS_SUPERSEDED);
-    outputString = outputString.concat("\nAmount of Properties superseded: "+COUNTER_DATAROW_PROPERTY_SUPERSEDED);
-    outputString = outputString.concat("\nAmount of DataTypes superseded: "+COUNTER_DATAROW_DATATYPE_SUPERSEDED);
-    outputString = outputString.concat("\nAmount of EnumerationMembers superseded: "+COUNTER_DATAROW_ENUMERATIONMEMBER_SUPERSEDED);
+    outputString = outputString.concat("\n\nAmount of Classes (including Enumerations) superseded: " + COUNTER_DATAROW_CLASS_SUPERSEDED);
+    outputString = outputString.concat("\nAmount of Properties superseded: " + COUNTER_DATAROW_PROPERTY_SUPERSEDED);
+    outputString = outputString.concat("\nAmount of DataTypes superseded: " + COUNTER_DATAROW_DATATYPE_SUPERSEDED);
+    outputString = outputString.concat("\nAmount of EnumerationMembers superseded: " + COUNTER_DATAROW_ENUMERATIONMEMBER_SUPERSEDED);
 
-    writeDataInLocalFile("Log.txt",outputString);
+    writeDataInLocalFile("Log.txt", outputString);
 }
 
 
@@ -785,44 +796,61 @@ function exportMetaFiles() {
 function uniquifyArray(array) {
     let seen = {};
     let result = [];
-    for(let i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
         let item = array[i];
-        if(seen[item] !== 1) {
+        if (seen[item] !== 1) {
             seen[item] = 1;
             result.push(item);
         }
     }
     return result;
 }
-function print(msgType,msg){
-    switch (msgType){
-        case "i":  console.log("Info: "+msg);break;
-        case "w":  console.log("Warning: "+msg);break;
-        case "e":  console.log("Error: "+msg);break;
-        case "d":  console.log("Debug: "+msg);break;
+
+function print(msgType, msg) {
+    switch (msgType) {
+        case "i":
+            console.log("Info: " + msg);
+            break;
+        case "w":
+            console.log("Warning: " + msg);
+            break;
+        case "e":
+            console.log("Error: " + msg);
+            break;
+        case "d":
+            console.log("Debug: " + msg);
+            break;
     }
 }
+
 function stringifyJSON(data) {
     return JSON.stringify(data, null, 2);
 }
+
 let contextURI = "http://schema.org/";
+
 function clipURIString(str) {
-    return str.substr(contextURI.length,str.length-1);
+    return str.substr(contextURI.length, str.length - 1);
 }
-function check_isArray(object){
+
+function check_isArray(object) {
     return Array.isArray(object);
 }
+
 function check_isUndefined(object) {
     return object === undefined;
 }
+
 function check_isString(object) {
     return typeof object === "string"
 }
-function writeDataInLocalFile(outputPath, data){
-    console.log("writing data into "+PATH_OUTPUT_DIRECTORY+"/"+outputPath+" .");
-    fs.writeFileSync(PATH_OUTPUT_DIRECTORY+"/"+outputPath, data , 'utf-8');
+
+function writeDataInLocalFile(outputPath, data) {
+    console.log("writing data into " + PATH_OUTPUT_DIRECTORY + "/" + outputPath + " .");
+    fs.writeFileSync(PATH_OUTPUT_DIRECTORY + "/" + outputPath, data, 'utf-8');
 }
-function cloneJSON(json){
+
+function cloneJSON(json) {
     return JSON.parse(JSON.stringify(json));
 }
 
@@ -833,37 +861,41 @@ function cloneJSON(json){
  */
 
 function outputMemory() {
-    writeDataInLocalFile("memory_classes.json",stringifyJSON(memory_classes));
-    writeDataInLocalFile("memory_properties.json",stringifyJSON(memory_properties));
-    writeDataInLocalFile("memory_dataTypes.json",stringifyJSON(memory_dataTypes));
-    writeDataInLocalFile("memory_enumerations.json",stringifyJSON(memory_enumerations));
-    writeDataInLocalFile("memory_enumerationMembers.json",stringifyJSON(memory_enumerationMembers));
+    writeDataInLocalFile("memory_classes.json", stringifyJSON(memory_classes));
+    writeDataInLocalFile("memory_properties.json", stringifyJSON(memory_properties));
+    writeDataInLocalFile("memory_dataTypes.json", stringifyJSON(memory_dataTypes));
+    writeDataInLocalFile("memory_enumerations.json", stringifyJSON(memory_enumerations));
+    writeDataInLocalFile("memory_enumerationMembers.json", stringifyJSON(memory_enumerationMembers));
 }
-function printOccurrencesNumberOfPropertyOfArray(array,property) {
+
+function printOccurrencesNumberOfPropertyOfArray(array, property) {
     let resultArr = {};
-    for(let i=0;i<array.length;i++){
+    for (let i = 0; i < array.length; i++) {
         let actType = array[i][property];
-        if(resultArr[actType]>0){
+        if (resultArr[actType] > 0) {
             resultArr[actType] = resultArr[actType] + 1;
         } else {
-            resultArr[actType] = 1 ;
+            resultArr[actType] = 1;
         }
     }
-    print("d",stringifyJSON(resultArr));
+    print("d", stringifyJSON(resultArr));
 }
+
 function printArrayOccurrences(array, property) {
-    for(let i=0;i<array.length;i++){
+    for (let i = 0; i < array.length; i++) {
         let actDataRow = array[i];
-        if(Array.isArray(actDataRow[property])){
-            print("d","Object '"+JSON.stringify(actDataRow)+"' has array for "+property);
+        if (Array.isArray(actDataRow[property])) {
+            print("d", "Object '" + JSON.stringify(actDataRow) + "' has array for " + property);
         }
     }
 }
+
 function printAmountOfPropertiesForObject(arr, name) {
-    print("d","Object '"+name+"' has "+Object.keys(arr).length+" properties.");
+    print("d", "Object '" + name + "' has " + Object.keys(arr).length + " properties.");
 }
+
 function printErrorLog(errors) {
-    for(let i=0; i < errors.length; i++){
-        print("d",errors[i].message+"\nPayload: "+JSON.stringify(errors[i].payload));
+    for (let i = 0; i < errors.length; i++) {
+        print("d", errors[i].message + "\nPayload: " + JSON.stringify(errors[i].payload));
     }
 }

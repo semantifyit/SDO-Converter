@@ -64,11 +64,7 @@ Materialized:
 
 - **sdo_classesMaterialized.json** - Contains the classes (types), data types and enumerations of SDO with their characteristics. Some characteristics are materialized, eg. Class->properties or Enumeration->enumerationMembers. The materialization also includes inheritance for classes, hence all classes list the properties inherited from their superclasses.
 
-Minified versions:
-
-- **sdo_classes.json** -> **sdo_classes.min.json**
-
-## Algorithm
+##Algorithm
 
 ### A.) Load Schema
 Load file **schema.jsonld** from directory **data_input**. Store the _@graph_ nodes of the schema in memory for further processing. Every @graph node holds minor information about a specific resource, which is identified by the used **@id**. 
@@ -279,7 +275,7 @@ Example data entry in the enumerations memory:
 ```JSON
 {
   "name": "PaymentStatusType",
-  "description": "A specific payment status. For example, PaymentDue, PaymentComplete, etc.",
+  "description": examples,
   "type": "Enumeration",
   "superClasses": [
     "Enumeration"
@@ -347,7 +343,7 @@ For the file **sdo_classesMaterialized.json**:
 4. Materialize enumerationMembers for all enumerations. For all enumerationMembers substitute the enumerationMember id with the corresponding object representation from the enumerationMember memory.
 
 ### G.) Export Output Data 
-The output data created in the previous step is stored in the **data_output** directory of this project. Additional files are created which contain information about the conversion process and minified versions of the SDO data:
+The output data created in the previous step is stored in the **data_output** directory of this project. Additional files that contain information about the conversion process are created:
 
 - Log.txt - Contains meta data about the conversion.
 - ErrorLog.txt - Contains errors during the conversion and their source.
