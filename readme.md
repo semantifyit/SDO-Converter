@@ -1,5 +1,5 @@
 # Schema.Org Converter (SDO-Converter)
-This is a standalone JavaScript (JS) tool that converts the vocabulary of [Schema.org](http://schema.org/) into easy to use JSON files with a tree-like data model. This tool comes with a JS library (SDO-Library) that uses the previously mentioned JSON files to provide data-retrieving functions for the Schema.org vocabulary.
+This is a stand-alone JavaScript (JS) tool that converts the vocabulary of [Schema.org](http://schema.org/) into easy to use JSON files with a tree-like data model. This tool comes with a JS library (SDO-Library) that uses the previously mentioned JSON files to provide data-retrieving functions for the Schema.org vocabulary.
 
 The SDO-Converter fetches the vocabulary from the [Schema.org website](http://schema.org/docs/developers.html#formats) in JSON-LD format and transforms the data into several json files containing structured representations of the vocabulary ([classes](https://schema.org/Thing) [most times called "types" in Schema.org], properties, [basic data types](https://schema.org/DataType), [enumerations](https://schema.org/Enumeration), enumeration members). 
 
@@ -7,15 +7,25 @@ There is a [Wiki](documentation/algorithm.md) explaining the algorithm and the g
 
 ### Prerequisites
 * Have [Node.js](https://nodejs.org/en/) installed.
-### Install
-Download the package
+
+### Install as stand-alone project
+Clone the project from the git repository
 ```bash
-npm install sdo-converter
+git clone https://github.com/semantifyit/SDO-Converter.git
 ```
 In the project's folder to download all dependencies:
 ```bash
 npm install
 ```
+
+### Install as npm package
+Download the package
+```bash
+npm install sdo-converter
+```
+
+You can use the package as a stand-alone tool, or use the sdoLibrary in your project. See the example files on how to require/import and use the library.
+
 ## Usage of SDO-Converter
 In the project's folder to start the tool:
 ```bash
@@ -52,17 +62,23 @@ help -> shows this information.
 ### Output
 The **data_output** directory will contain following files for the specified Schema.org version:
 
+if --materialize=false:
 * **sdo_classes.json** - Contains the [classes](https://schema.org/Thing) of SDO with their characteristics. Properties from their super-classes are not present (see "Usage of data" for details).
 * **sdo_properties.json** - Contains the properties of SDO with their characteristics. 
 * **sdo_dataTypes.json** - Contains the [basic data types](https://schema.org/DataType) of SDO with their characteristics. 
 * **sdo_enumerations.json** - Contains the [enumerations](https://schema.org/Enumeration) of SDO with their characteristics. Properties from their super-classes are not present (see "Usage of data" for details).
 * **sdo_enumerationMembers.json** - Contains the enumeration instances of SDO with their characteristics. 
 
-## Usage of data (SDO-Library)
+if --materialize=true:
+* **sdo_classesMaterialized.json** - Contains the classes (types), data types and enumerations of SDO with their characteristics. Some characteristics are materialized, eg. Class->properties and Enumeration->enumerationMembers. The materialization also includes inheritance for classes, hence all classes list the properties inherited from their super-classes.
+
+## Usage of SDO-Library
 
 The user can use the generated data in any way he wishes. 
 
-This project provides a library to load and materialize the SDO data (basically stick the parts of the vocabulary together). The possibility to execute the materialization on the target application increases the performance of the application (load small data files, fast creation of materialized objects). This library is usable in browsers (file: **sdoLibrary_browser.js**) and in nodeJS (file: **sdoLibrary_node.js**).
+This project provides a library to load and materialize the SDO data (basically stick the parts of the vocabulary together). The possibility to execute the materialization on the target application increases the performance of the application (load small data files, fast creation of materialized objects in-memory). 
+
+This library is usable in browsers (file: **sdoLibrary_browser.js**) and in nodeJS (file: **sdoLibrary_node.js**).
 
 Two example files are provided to show how the library and the generated data can be used in their respective environments (example for browser: **example_browser.html**, example for nodeJS: **example_node.js**)
 
@@ -80,7 +96,10 @@ Usage example for browsers:
 <script>
     (function () {
         sdoLibrary.setVersion("latest");
-        var person = sdoLibrary.get_classMaterialized("Person");
+        //you can implement a callback or a timeout, depending on your used technologies
+        setTimeout(function () {
+            var personJSON = sdoLibrary.get_classMaterialized("Person");
+        }, 1000);
     })();
 </script>
 
@@ -88,7 +107,7 @@ Usage example for browsers:
 
 #### Functions provided by the SDO-Library
 
-In general you want to use the materialized data provided by the library, since it contains all classes (things), enumerations, and basic data types from Schema.org along with the properties of their super-classes (inheritance of properties in Schema.org). These properties are provided as complete JSON objects (instead of only their id) with their corresponding ranges, descriptions, etc.
+In general you want to use the materialized data provided by the library, since it contains all classes (things), enumerations, and basic data types from Schema.org along with the properties of their super-classes (based on the inheritance of properties in Schema.org). These properties are provided as complete JSON objects (instead of only their id) with their corresponding ranges, descriptions, etc.
 
 **Functions for materialized data:**
 
