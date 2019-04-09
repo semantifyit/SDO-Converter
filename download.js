@@ -4,7 +4,7 @@ let request = require('request');
 //loads the schema.jsonld from Schema.org and saves it in the input directory
 async function downloadSchema(PATH_INPUT_DIRECTORY, version) {
     return new Promise(function (resolve, reject) {
-        let uri = "http://schema.org/version/" + version + "/schema.jsonld";
+        let uri = "http://schema.org/version/" + version + "/all-layers.jsonld"; //download the core vocabulary + all extensions
         request.get(uri).on('response', function (res) {
             if (res.statusCode === 200) {
                 if (!fs.existsSync(PATH_INPUT_DIRECTORY + "/" + version)) {
